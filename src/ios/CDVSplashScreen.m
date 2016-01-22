@@ -46,12 +46,12 @@
 
 - (void)pageDidLoad
 {
-    id autoHideSplashScreenValue = [self.commandDelegate.settings objectForKey:[@"AutoHideSplashScreen" lowercaseString]];
+    // id autoHideSplashScreenValue = [self.commandDelegate.settings objectForKey:[@"AutoHideSplashScreen" lowercaseString]];
 
-    // if value is missing, default to yes
-    if ((autoHideSplashScreenValue == nil) || [autoHideSplashScreenValue boolValue]) {
-        [self setVisible:NO];
-    }
+    // // if value is missing, default to yes
+    // if ((autoHideSplashScreenValue == nil) || [autoHideSplashScreenValue boolValue]) {
+    //     [self setVisible:NO];
+    // }
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
@@ -413,32 +413,41 @@
             {
                 [self createViews];
             }
+            if (autoHideSplashScreenValue)
+            {
+                float effectiveSplashDuration = (splashDuration - fadeDuration) / 1000;
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (uint64_t) effectiveSplashDuration * NSEC_PER_SEC), dispatch_get_main_queue(), CFBridgingRelease(CFBridgingRetain(^(void) {
+                       [self fadeSplashScreen:fadeDuration];
+                })));
+            }
         }
-        else if (fadeDuration == 0 && splashDuration == 0 || !autoHideSplashScreenValue)
+        else if (fadeDuration == 0)
         {
             [self destroyViews];
         }
         else
         {
-            __weak __typeof(self) weakSelf = self;
-            float effectiveSplashDuration = (splashDuration - fadeDuration) / 1000;
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (uint64_t) effectiveSplashDuration * NSEC_PER_SEC), dispatch_get_main_queue(), CFBridgingRelease(CFBridgingRetain(^(void) {
-                   [UIView transitionWithView:self.viewController.view
-                                   duration:(fadeDuration / 1000)
-                                   options:UIViewAnimationOptionTransitionNone
-                                   animations:^(void) {
-                                       [weakSelf hideViews];
-                                   }
-                                   completion:^(BOOL finished) {
-                                       if (finished) {
-                                           [weakSelf destroyViews];
-                                           // TODO: It might also be nice to have a js event happen here -jm
-                                       }
-                                     }
-                    ];
-            })));
+            [self fadeSplashScreen:fadeDuration];
         }
     }
+}
+
+- (void)fadeSplashScreen:(float)fadeDuration
+{
+    __weak __typeof(self) weakSelf = self;
+    [UIView transitionWithView:self.viewController.view
+                   duration:(fadeDuration / 1000)
+                   options:UIViewAnimationOptionTransitionNone
+                   animations:^(void) {
+                       [weakSelf hideViews];
+                   }
+                   completion:^(BOOL finished) {
+                       if (finished) {
+                           [weakSelf destroyViews];
+                           // TODO: It might also be nice to have a js event happen here -jm
+                       }
+                     }
+    ];
 }
 
 @end
