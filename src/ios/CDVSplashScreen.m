@@ -388,6 +388,9 @@
         id splashDurationString = [self.commandDelegate.settings objectForKey: [@"SplashScreenDelay" lowercaseString]];
         float splashDuration = splashDurationString == nil ? kSplashScreenDurationDefault : [splashDurationString floatValue];
 
+        id autoHideSplashScreenValue = [self.commandDelegate.settings objectForKey:[@"AutoHideSplashScreen" lowercaseString]];
+        autoHideSplashScreenValue = (autoHideSplashScreenValue == nil) || [autoHideSplashScreenValue boolValue];
+
         if (fadeSplashScreenValue == nil)
         {
             fadeSplashScreenValue = @"true";
@@ -411,7 +414,7 @@
                 [self createViews];
             }
         }
-        else if (fadeDuration == 0 && splashDuration == 0)
+        else if (fadeDuration == 0 && splashDuration == 0 || !autoHideSplashScreenValue)
         {
             [self destroyViews];
         }
