@@ -389,7 +389,6 @@
         float splashDuration = splashDurationString == nil ? kSplashScreenDurationDefault : [splashDurationString floatValue];
 
         id autoHideSplashScreenValue = [self.commandDelegate.settings objectForKey:[@"AutoHideSplashScreen" lowercaseString]];
-        autoHideSplashScreenValue = (autoHideSplashScreenValue == nil) || [autoHideSplashScreenValue boolValue];
 
         if (fadeSplashScreenValue == nil)
         {
@@ -413,7 +412,7 @@
             {
                 [self createViews];
             }
-            if (autoHideSplashScreenValue)
+            if ((autoHideSplashScreenValue == nil) || [autoHideSplashScreenValue boolValue])
             {
                 float effectiveSplashDuration = (splashDuration - fadeDuration) / 1000;
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (uint64_t) effectiveSplashDuration * NSEC_PER_SEC), dispatch_get_main_queue(), CFBridgingRelease(CFBridgingRetain(^(void) {
